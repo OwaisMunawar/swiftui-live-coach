@@ -73,7 +73,7 @@ struct WorkoutCoordinator {
 
     /// Nonisolated so the returned activity is in a disconnected region and can
     /// be handed to ActivityKit's async update/end without crossing actors.
-    private nonisolated static func activity(for sessionID: UUID) -> Activity<WorkoutActivityAttributes>? {
+    nonisolated private static func activity(for sessionID: UUID) -> Activity<WorkoutActivityAttributes>? {
         Activity<WorkoutActivityAttributes>.activities.first { $0.attributes.sessionID == sessionID }
     }
 }
