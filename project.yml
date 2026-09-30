@@ -46,6 +46,7 @@ targets:
       - package: CoachUI
       - package: CoachIntelligence
       - package: CoachHealth
+      - target: LiveCoachWidgets
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.owaismunawar.livecoach
@@ -74,6 +75,37 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups:
+          - group.com.owaismunawar.livecoach
+
+  LiveCoachWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widgets
+      - Shared
+    dependencies:
+      - package: CoachCore
+      - package: CoachUI
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.owaismunawar.livecoach.widgets
+        PRODUCT_NAME: LiveCoachWidgets
+        APPLICATION_EXTENSION_API_ONLY: YES
+        SKIP_INSTALL: YES
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: LiveCoach Widgets
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widgets/LiveCoachWidgets.entitlements
+      properties:
         com.apple.security.application-groups:
           - group.com.owaismunawar.livecoach
 
