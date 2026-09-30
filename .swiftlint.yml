@@ -1,0 +1,55 @@
+included:
+  - App
+  - Shared
+  - Widgets
+  - Packages/CoachCore/Sources
+  - Packages/CoachCore/Tests
+  - Packages/CoachUI/Sources
+  - Packages/CoachIntelligence/Sources
+  - Packages/CoachIntelligence/Tests
+  - Packages/CoachHealth/Sources
+  - Packages/CoachHealth/Tests
+
+excluded:
+  - build
+  - "**/.build"
+
+opt_in_rules:
+  - closure_spacing
+  - collection_alignment
+  - contains_over_first_not_nil
+  - empty_count
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - last_where
+  - modifier_order
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - toggle_bool
+  - unneeded_parentheses_in_closure_argument
+  - vertical_whitespace_closing_braces
+
+disabled_rules:
+  - todo
+  - trailing_comma
+
+line_length:
+  warning: 140
+  ignores_comments: true
+  ignores_urls: true
+
+identifier_name:
+  excluded: [id, ny, z]
+
+type_body_length:
+  warning: 300
+
+function_body_length:
+  warning: 80
+
+force_unwrapping:
+  severity: warning
+
+force_try:
+  severity: warning
