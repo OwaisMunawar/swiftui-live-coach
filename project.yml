@@ -1,0 +1,97 @@
+name: LiveCoach
+
+options:
+  bundleIdPrefix: com.owaismunawar
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+  generateEmptyDirectories: false
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+    # No team is committed. Simulator builds sign locally; for a device,
+    # set DEVELOPMENT_TEAM in Xcode or pass it on the xcodebuild command line.
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ""
+
+packages:
+  CoachCore:
+    path: Packages/CoachCore
+  CoachUI:
+    path: Packages/CoachUI
+  CoachIntelligence:
+    path: Packages/CoachIntelligence
+  CoachHealth:
+    path: Packages/CoachHealth
+
+targets:
+  LiveCoach:
+    type: application
+    platform: iOS
+    sources:
+      - App
+      - Shared
+    dependencies:
+      - package: CoachCore
+      - package: CoachUI
+      - package: CoachIntelligence
+      - package: CoachHealth
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.owaismunawar.livecoach
+        PRODUCT_NAME: LiveCoach
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: LiveCoach
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSSupportsLiveActivities: true
+        NSHealthShareUsageDescription: LiveCoach reads your steps and active energy to tailor your weekly training plan. Your data never leaves your device.
+        CFBundleURLTypes:
+          - CFBundleURLName: com.owaismunawar.livecoach
+            CFBundleURLSchemes:
+              - livecoach
+    entitlements:
+      path: App/LiveCoach.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.security.application-groups:
+          - group.com.owaismunawar.livecoach
+
+schemes:
+  LiveCoach:
+    build:
+      targets:
+        LiveCoach: all
+    run:
+      config: Debug
+      commandLineArguments:
+        "-demoData": false
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - package: CoachCore/CoachCoreTests
+        - package: CoachIntelligence/CoachIntelligenceTests
+        - package: CoachHealth/CoachHealthTests
+    archive:
+      config: Release
