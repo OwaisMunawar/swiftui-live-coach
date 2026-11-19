@@ -109,6 +109,18 @@ targets:
         com.apple.security.application-groups:
           - group.com.owaismunawar.livecoach
 
+  LiveCoachUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: LiveCoach
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.owaismunawar.livecoach.uitests
+        GENERATE_INFOPLIST_FILE: YES
+
 schemes:
   LiveCoach:
     build:
@@ -122,6 +134,7 @@ schemes:
       config: Debug
       gatherCoverageData: true
       targets:
+        - LiveCoachUITests
         - package: CoachCore/CoachCoreTests
         - package: CoachIntelligence/CoachIntelligenceTests
         - package: CoachHealth/CoachHealthTests

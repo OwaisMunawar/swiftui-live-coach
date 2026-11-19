@@ -1,6 +1,7 @@
 included:
   - App
   - Shared
+  - UITests
   - Widgets
   - Packages/CoachCore/Sources
   - Packages/CoachCore/Tests
