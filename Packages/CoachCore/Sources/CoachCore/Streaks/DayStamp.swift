@@ -62,3 +62,21 @@ extension DayStamp {
         return (0..<length).reversed().map { adding(days: -$0, calendar: calendar) }
     }
 }
+
+extension DayStamp {
+    /// The first day of the calendar week containing `self`. Which weekday that
+    /// is follows `calendar.firstWeekday`, so a Monday-first locale and a
+    /// Sunday-first locale disagree about the same date, as they should.
+    public func startOfWeek(calendar: Calendar) -> DayStamp {
+        guard let interval = calendar.dateInterval(of: .weekOfYear, for: noon(in: calendar)) else { return self }
+        // A DST change at midnight can push the interval start to 01:00, which is
+        // still the same calendar day.
+        return DayStamp(interval.start, calendar: calendar)
+    }
+
+    /// The seven days of the calendar week containing `self`, oldest first.
+    public func weekDays(calendar: Calendar) -> [DayStamp] {
+        let start = startOfWeek(calendar: calendar)
+        return (0..<7).map { start.adding(days: $0, calendar: calendar) }
+    }
+}

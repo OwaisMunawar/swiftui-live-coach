@@ -12,13 +12,15 @@ public enum DemoSeed {
         let adherence: Double
         /// Guaranteed completed days leading up to today.
         let streak: Int
+        /// Check-ins wanted per week, or `nil` for a daily habit.
+        var weeklyTarget: Int?
     }
 
     static let templates: [Template] = [
         Template(name: "Morning stretch", symbol: "figure.flexibility", tint: .teal, adherence: 0.8, streak: 12),
         Template(name: "Drink 2L water", symbol: "drop.fill", tint: .indigo, adherence: 0.9, streak: 21),
-        Template(name: "Read 20 pages", symbol: "book.fill", tint: .orange, adherence: 0.6, streak: 4),
-        Template(name: "No screens after 10pm", symbol: "moon.zzz.fill", tint: .pink, adherence: 0.35, streak: 0),
+        Template(name: "Read 20 pages", symbol: "book.fill", tint: .orange, adherence: 0.6, streak: 4, weeklyTarget: 5),
+        Template(name: "No screens after 10pm", symbol: "moon.zzz.fill", tint: .pink, adherence: 0.35, streak: 0, weeklyTarget: 3),
         Template(name: "Meditate", symbol: "brain.head.profile", tint: .green, adherence: 0.7, streak: 6),
     ]
 
@@ -53,7 +55,7 @@ public enum DemoSeed {
         for (index, template) in templates.enumerated() {
             let created = today.adding(days: -84, calendar: calendar).noon(in: calendar)
             let habit = Habit(name: template.name, symbolName: template.symbol, tint: template.tint,
-                              createdAt: created, sortOrder: index)
+                              createdAt: created, sortOrder: index, weeklyTarget: template.weeklyTarget)
             context.insert(habit)
 
             // Leave "today" open for most habits so the check buttons have

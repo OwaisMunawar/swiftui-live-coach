@@ -31,6 +31,39 @@ struct ModelTests {
         #expect(!habit.isCompleted(on: day))
     }
 
+    @Test func weeklyTargetPersistsAndDailyHabitsHaveNoProgress() throws {
+        let weekly = Habit(name: "Run", weeklyTarget: 3)
+        let daily = Habit(name: "Water")
+        context.insert(weekly)
+        context.insert(daily)
+        try context.save()
+
+        let stored = try #require(try context.habits().first { $0.name == "Run" })
+        #expect(stored.weeklyTarget == 3)
+        let today = DayStamp(year: 2026, month: 9, day: 30)
+        #expect(daily.weeklyProgress(today: today, calendar: calendar) == nil)
+        #expect(daily.weeklyStreak(today: today, calendar: calendar) == nil)
+    }
+
+    @Test func weeklyProgressReadsCompletionsFromTheHabit() throws {
+        let habit = Habit(name: "Run", weeklyTarget: 2)
+        context.insert(habit)
+        let monday = DayStamp(year: 2026, month: 9, day: 28)
+        var mondayFirst = calendar
+        mondayFirst.firstWeekday = 2
+        habit.markCompleted(on: monday, in: context)
+        habit.markCompleted(on: monday.adding(days: 2, calendar: mondayFirst), in: context)
+        try context.save()
+
+        let progress = try #require(habit.weeklyProgress(today: monday.adding(days: 2, calendar: mondayFirst), calendar: mondayFirst))
+        #expect(progress.isMet && progress.completed == 2)
+        #expect(habit.weeklyStreak(today: monday.adding(days: 2, calendar: mondayFirst), calendar: mondayFirst) == 1)
+    }
+
+    @Test func aWeeklyTargetOfSevenIsStoredAsDaily() {
+        #expect(Habit(name: "Every day", weeklyTarget: 7).weeklyTarget == nil)
+    }
+
     @Test func markCompletedIsIdempotent() throws {
         let habit = Habit(name: "Stretch")
         context.insert(habit)

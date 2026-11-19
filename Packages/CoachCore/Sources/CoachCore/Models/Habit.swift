@@ -9,6 +9,9 @@ public final class Habit {
     public var tintName: String
     public var createdAt: Date
     public var sortOrder: Int
+    /// Check-ins wanted per calendar week, or `nil` for a daily habit. Optional
+    /// with no default so stores created before weekly goals migrate in place.
+    public var weeklyTarget: Int?
 
     @Relationship(deleteRule: .cascade, inverse: \HabitCompletion.habit)
     public var completions: [HabitCompletion] = []
@@ -19,7 +22,8 @@ public final class Habit {
         symbolName: String = "checkmark.circle",
         tint: HabitTint = .teal,
         createdAt: Date = .now,
-        sortOrder: Int = 0
+        sortOrder: Int = 0,
+        weeklyTarget: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -27,6 +31,7 @@ public final class Habit {
         self.tintName = tint.rawValue
         self.createdAt = createdAt
         self.sortOrder = sortOrder
+        self.weeklyTarget = WeeklyGoal.normalized(weeklyTarget)
     }
 
     public var tint: HabitTint {
@@ -71,6 +76,18 @@ extension Habit {
 
     public func currentStreak(today: DayStamp, calendar: Calendar) -> Int {
         StreakCalculator.currentStreak(days: completedDays, today: today, calendar: calendar)
+    }
+
+    /// Progress against the weekly goal, or `nil` for a daily habit.
+    public func weeklyProgress(today: DayStamp, calendar: Calendar) -> WeeklyProgress? {
+        guard let target = WeeklyGoal.normalized(weeklyTarget) else { return nil }
+        return WeeklyGoal.progress(days: completedDays, target: target, today: today, calendar: calendar)
+    }
+
+    /// Consecutive weeks the goal was met, or `nil` for a daily habit.
+    public func weeklyStreak(today: DayStamp, calendar: Calendar) -> Int? {
+        guard let target = WeeklyGoal.normalized(weeklyTarget) else { return nil }
+        return WeeklyGoal.currentStreak(days: completedDays, target: target, today: today, calendar: calendar)
     }
 
     public func longestStreak(calendar: Calendar) -> Int {
