@@ -83,6 +83,12 @@ struct HabitDetailView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu("More", systemImage: "ellipsis") {
+                    Picker("Goal", selection: goalBinding(for: habit)) {
+                        Text("Every day").tag(Int?.none)
+                        ForEach(WeeklyGoal.targets, id: \.self) { days in
+                            Text("\(days) \(days == 1 ? "day" : "days") a week").tag(Int?.some(days))
+                        }
+                    }
                     Button("Delete Habit", systemImage: "trash", role: .destructive) { isConfirmingDelete = true }
                 }
             }
@@ -100,14 +106,34 @@ struct HabitDetailView: View {
         }
     }
 
+    private func goalBinding(for habit: Habit) -> Binding<Int?> {
+        Binding(
+            get: { WeeklyGoal.normalized(habit.weeklyTarget) },
+            set: { newValue in
+                habit.weeklyTarget = WeeklyGoal.normalized(newValue)
+                try? context.save()
+                WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.todayHabits)
+            }
+        )
+    }
+
     @ViewBuilder
     private func tiles(habit: Habit, today: DayStamp, rate: Double) -> some View {
-        let current = habit.currentStreak(today: today, calendar: calendar)
-        let best = habit.longestStreak(calendar: calendar)
-        StatTile(title: "Streak", value: "\(current)", symbol: "flame.fill", tint: .orange,
-                 spokenValue: "\(current) days")
-        StatTile(title: "Best", value: "\(best)", symbol: "trophy.fill", tint: .yellow,
-                 spokenValue: "\(best) days")
+        if let weekly = habit.weeklyProgress(today: today, calendar: calendar) {
+            let weeks = habit.weeklyStreak(today: today, calendar: calendar) ?? 0
+            StatTile(title: "Week streak", value: "\(weeks)", symbol: "flame.fill", tint: .orange,
+                     spokenValue: "\(weeks) \(weeks == 1 ? "week" : "weeks")")
+            StatTile(title: "This week", value: "\(weekly.completed)/\(weekly.target)",
+                     symbol: "target", tint: weekly.isMet ? .green : habit.tint.color,
+                     spokenValue: "\(weekly.completed) of \(weekly.target) check-ins")
+        } else {
+            let current = habit.currentStreak(today: today, calendar: calendar)
+            let best = habit.longestStreak(calendar: calendar)
+            StatTile(title: "Streak", value: "\(current)", symbol: "flame.fill", tint: .orange,
+                     spokenValue: "\(current) days")
+            StatTile(title: "Best", value: "\(best)", symbol: "trophy.fill", tint: .yellow,
+                     spokenValue: "\(best) days")
+        }
         StatTile(title: "30 days", value: rate.formatted(.percent.precision(.fractionLength(0))),
                  symbol: "chart.bar.fill", tint: habit.tint.color)
     }

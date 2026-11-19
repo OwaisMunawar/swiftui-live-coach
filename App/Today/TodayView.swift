@@ -122,9 +122,12 @@ struct HabitRow: View {
     let today: DayStamp
     let toggle: () -> Void
 
+    private let calendar = Calendar.current
+
     var body: some View {
         let isDone = habit.isCompleted(on: today)
-        let streak = habit.currentStreak(today: today, calendar: .current)
+        let weekly = habit.weeklyProgress(today: today, calendar: calendar)
+        let streak = streakBadge(weekly: weekly)
         HStack(spacing: 12) {
             Button(action: toggle) {
                 HabitCheckmark(isDone: isDone, tint: habit.tint.color)
@@ -137,20 +140,26 @@ struct HabitRow: View {
 
             NavigationLink(value: habit.id) {
                 HStack {
-                    Label {
-                        Text(habit.name)
-                            .foregroundStyle(.primary)
-                    } icon: {
-                        Image(systemName: habit.symbolName)
-                            .foregroundStyle(habit.tint.color)
-                            .frame(minWidth: 28)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Label {
+                            Text(habit.name)
+                                .foregroundStyle(.primary)
+                        } icon: {
+                            Image(systemName: habit.symbolName)
+                                .foregroundStyle(habit.tint.color)
+                                .frame(minWidth: 28)
+                        }
+                        if let weekly {
+                            WeeklyGoalCaption(progress: weekly)
+                                .padding(.leading, 40)
+                        }
                     }
                     Spacer()
-                    if streak > 0 {
-                        Label("\(streak)", systemImage: "flame.fill")
+                    if let streak {
+                        Label("\(streak.count)", systemImage: "flame.fill")
                             .font(.subheadline.monospacedDigit().weight(.medium))
                             .foregroundStyle(.orange)
-                            .accessibilityLabel("\(streak) day streak")
+                            .accessibilityLabel(streak.spoken)
                     }
                     Image(systemName: "chevron.right")
                         .font(.footnote.weight(.semibold))
@@ -163,6 +172,31 @@ struct HabitRow: View {
             .accessibilityHint("Shows streaks and history")
         }
         .padding(.vertical, 6)
+    }
+
+    /// Weekly habits show their run of met weeks; daily habits their run of days.
+    private func streakBadge(weekly: WeeklyProgress?) -> (count: Int, spoken: String)? {
+        if weekly != nil, let weeks = habit.weeklyStreak(today: today, calendar: calendar) {
+            return weeks > 0 ? (weeks, "\(weeks) week streak") : nil
+        }
+        let days = habit.currentStreak(today: today, calendar: calendar)
+        return days > 0 ? (days, "\(days) day streak") : nil
+    }
+}
+
+private struct WeeklyGoalCaption: View {
+    let progress: WeeklyProgress
+
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(progress.isMet ? Color.green : progress.isReachable ? Color.secondary : Color.red)
+    }
+
+    private var text: String {
+        if progress.isMet { return "Goal met this week" }
+        if !progress.isReachable { return "\(progress.completed) of \(progress.target) this week, out of reach" }
+        return "\(progress.completed) of \(progress.target) this week"
     }
 }
 

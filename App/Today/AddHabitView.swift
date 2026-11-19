@@ -13,6 +13,7 @@ struct AddHabitView: View {
     @State private var name = ""
     @State private var symbol = Self.symbols[0]
     @State private var tint: HabitTint = .teal
+    @State private var weeklyTarget: Int?
 
     static let symbols = [
         "checkmark.circle", "drop.fill", "book.fill", "figure.flexibility", "brain.head.profile", "moon.zzz.fill",
@@ -49,6 +50,19 @@ struct AddHabitView: View {
                     }
                     .padding(.vertical, 4)
                 }
+                Section {
+                    Picker("Goal", selection: $weeklyTarget) {
+                        Text("Every day").tag(Int?.none)
+                        ForEach(WeeklyGoal.targets, id: \.self) { days in
+                            Text("\(days) \(days == 1 ? "day" : "days") a week").tag(Int?.some(days))
+                        }
+                    }
+                    .pickerStyle(.menu)
+                } header: {
+                    Text("Goal")
+                } footer: {
+                    Text("Weekly goals count check-ins per calendar week, so a missed day doesn't end the run.")
+                }
                 Section("Colour") {
                     Picker("Colour", selection: $tint) {
                         ForEach(HabitTint.allCases, id: \.self) { tint in
@@ -76,7 +90,8 @@ struct AddHabitView: View {
 
     private func save() {
         guard !trimmedName.isEmpty else { return }
-        context.insert(Habit(name: trimmedName, symbolName: symbol, tint: tint, sortOrder: nextSortOrder))
+        context.insert(Habit(name: trimmedName, symbolName: symbol, tint: tint, sortOrder: nextSortOrder,
+                             weeklyTarget: weeklyTarget))
         try? context.save()
         WidgetCenter.shared.reloadTimelines(ofKind: WidgetKinds.todayHabits)
         LiveCoachShortcuts.updateAppShortcutParameters()
