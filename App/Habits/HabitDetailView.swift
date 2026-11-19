@@ -121,7 +121,7 @@ struct HabitDetailView: View {
     private func tiles(habit: Habit, today: DayStamp, rate: Double) -> some View {
         if let weekly = habit.weeklyProgress(today: today, calendar: calendar) {
             let weeks = habit.weeklyStreak(today: today, calendar: calendar) ?? 0
-            StatTile(title: "Week streak", value: "\(weeks)", symbol: "flame.fill", tint: .orange,
+            StatTile(title: "Streak", value: "\(weeks) wk", symbol: "flame.fill", tint: .orange,
                      spokenValue: "\(weeks) \(weeks == 1 ? "week" : "weeks")")
             StatTile(title: "This week", value: "\(weekly.completed)/\(weekly.target)",
                      symbol: "target", tint: weekly.isMet ? .green : habit.tint.color,
