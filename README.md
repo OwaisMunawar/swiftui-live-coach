@@ -34,6 +34,10 @@ Most habit apps stop at a checklist. I wanted a small, complete app that uses th
 - A habit can ask for "N days a week" (1 to 6) instead of every day. The Today row shows "2 of 3 this week", turns green when the goal is met and says so when it can no longer be reached.
 - Weekly habits keep a run of consecutive weeks in which the goal was met. A week still in progress neither counts nor breaks the run, the same rule daily streaks use for a day that is not done yet.
 - Weeks follow the device calendar's first weekday, and the arithmetic is on `DayStamp`s, so DST changes, the date line and the new year do not split or merge a week. The goal is set when adding a habit and can be changed later from the habit's menu.
+<p>
+  <img src="docs/weekly-goal-detail.png" width="24%" alt="Habit detail for a weekly habit with a week streak, this-week progress and 30-day rate">
+</p>
+
 - Stores created before this release open unchanged: `weeklyTarget` is an optional attribute, so SwiftData migrates it in place. I checked that by seeding a store with the 0.1.0 build and opening it with the new one.
 
 ### Widgets
@@ -126,7 +130,7 @@ Run the `LiveCoach` scheme on an iOS 26 simulator. To start with sample habits a
   swift test --package-path Packages/CoachCore
   ```
   or all at once through the app scheme with `xcodebuild -scheme LiveCoach -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test`.
-- Not covered yet: the goal picker (add sheet and habit menu) builds and is wired to the same tested logic, but I have not driven it in the simulator or with a UI test. The Today captions and the upgrade from a 0.1.0 store were checked in the simulator.
+- **3 UI tests** (XCUITest, `UITests/`) drive the weekly-goal flow on the demo data: add a habit with a goal, check it off and read the Today caption and the detail tiles, change the goal from the habit menu, and find the demo habits' captions. The detail screenshot above was captured by the first test. They run in the `LiveCoach` scheme alongside the package tests.
 - Swift 6 complete concurrency checking with warnings treated as errors; the app, widget and packages build with zero warnings.
 - `swiftlint lint --strict` runs in CI alongside package tests and a full simulator build and test.
 - Accessibility: Dynamic Type throughout (text styles and `@ScaledMetric`), VoiceOver labels, values and hints on the custom check buttons, rings, stat tiles and heatmap.
@@ -136,7 +140,7 @@ Run the `LiveCoach` scheme on an iOS 26 simulator. To start with sample habits a
 - Home Screen widget screenshot for the README (the widget works; adding it to the Simulator Home Screen is manual).
 - Show weekly goal progress in the Home Screen widget.
 - Write completed sessions back to HealthKit as workouts, behind a separate permission.
-- Snapshot tests for the CoachUI components and a UI test for the start/pause/finish flow.
+- Snapshot tests for the CoachUI components and a UI test for the start/pause/finish flow (the weekly-goal flow is covered).
 - Push-to-update Live Activities so a session started on another device stays in sync.
 - Localisation beyond English.
 

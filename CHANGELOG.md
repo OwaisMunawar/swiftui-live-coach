@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-19
+
+### Added
+- UI tests for the weekly-goal flow: adding a habit with a goal, Today captions, detail tiles, changing the goal from the habit menu and the demo data's captions.
+
+### Fixed
+- The habit detail streak tile for weekly habits was truncated ("Week str...") at the default text size; it now reads "Streak" with the value in weeks.
+
 ## [0.2.0] - 2026-11-19
 
 ### Added
@@ -27,6 +35,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - `livecoach://` deep links and a `-demoData` launch argument.
 - CI with SwiftLint, package tests and a simulator build and test.
 
-[Unreleased]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OwaisMunawar/swiftui-live-coach/releases/tag/v0.1.0
