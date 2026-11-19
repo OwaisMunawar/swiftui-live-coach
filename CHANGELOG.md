@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-19
+
+### Added
+- Weekly goals: a habit can target 1 to 6 check-ins per calendar week, with progress on the Today row, a "This week" tile and a week streak on the habit detail, and a goal picker when adding a habit or from its menu.
+- `WeeklyGoal`, `WeeklyProgress` and `DayStamp.startOfWeek` in `CoachCore`, tested across first-weekday settings, DST, the date line and year boundaries.
+- Two demo habits with weekly goals.
+
+### Changed
+- `Habit` gains an optional `weeklyTarget`; existing stores migrate in place.
+
 ## [0.1.0] - 2026-09-30
 
 ### Added
@@ -17,5 +27,6 @@ All notable changes to this project are documented here. The format follows [Kee
 - `livecoach://` deep links and a `-demoData` launch argument.
 - CI with SwiftLint, package tests and a simulator build and test.
 
-[Unreleased]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/OwaisMunawar/swiftui-live-coach/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/OwaisMunawar/swiftui-live-coach/releases/tag/v0.1.0
