@@ -108,6 +108,23 @@ struct ModelTests {
         #expect(session.endedAt == start.addingTimeInterval(1_260))
     }
 
+    @Test func weekSummaryCarriesWeeklyGoalsIntoHabitStats() throws {
+        let now = Date.at(2026, 9, 30, 18, in: "Europe/London")
+        let today = DayStamp(now, calendar: calendar)
+        let run = Habit(name: "Run", weeklyTarget: 3)
+        let read = Habit(name: "Read")
+        [run, read].forEach(context.insert)
+        for offset in [0, -2, -4] {
+            run.markCompleted(on: today.adding(days: offset, calendar: calendar), in: context)
+        }
+
+        let summary = WeekSummary.make(habits: [run, read], sessions: [], now: now, calendar: calendar)
+        #expect(summary.habits.map(\.weeklyTarget) == [3, nil])
+        // Run met its goal; Read was never done, so only Read needs attention.
+        #expect(summary.weakestHabit?.name == "Read")
+        #expect(summary.habitCompletionRate == 0.3)
+    }
+
     @Test func weekSummaryAggregatesHabitsWorkoutsAndSteps() throws {
         let now = Date.at(2026, 9, 30, 18, in: "Europe/London")
         let today = DayStamp(now, calendar: calendar)
@@ -137,6 +154,7 @@ struct ModelTests {
                                        now: now, calendar: calendar)
         #expect(summary.days.count == 7)
         #expect(summary.habits == [HabitWeekStat(name: "Meditate", completedDays: 3, currentStreak: 3)])
+        #expect(summary.habits.first?.weeklyTarget == nil)
         #expect(summary.workoutCount == 1)
         #expect(summary.workoutMinutes == 55)
         #expect(summary.averageDailySteps == 6_000)

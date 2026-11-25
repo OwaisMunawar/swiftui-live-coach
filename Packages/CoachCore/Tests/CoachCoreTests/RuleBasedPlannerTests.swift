@@ -50,4 +50,44 @@ struct RuleBasedPlannerTests {
         #expect(plan.sessions.count == RuleBasedPlanner.maxSessions)
         #expect(plan.sessions.allSatisfy { $0.minutes <= 75 })
     }
+
+    @Test func aMetWeeklyGoalIsNotFlaggedAsWeak() {
+        let habits = [
+            HabitWeekStat(name: "Run", completedDays: 3, currentStreak: 0, weeklyTarget: 3),
+            HabitWeekStat(name: "Water", completedDays: 7, currentStreak: 9),
+        ]
+        let week = summary(workouts: 3, minutes: 120, steps: 9_000, habits: habits)
+        #expect(week.weakestHabit == nil)
+        #expect(week.habitCompletionRate == 1)
+        #expect(!planner.plan(for: week).sessions.contains { $0.kind == .focus })
+    }
+
+    @Test func aMissedWeeklyGoalIsFlaggedWithItsGoal() {
+        let habits = [
+            HabitWeekStat(name: "Run", completedDays: 1, currentStreak: 0, weeklyTarget: 3),
+            HabitWeekStat(name: "Water", completedDays: 5, currentStreak: 2),
+        ]
+        let week = summary(workouts: 3, minutes: 120, steps: 9_000, habits: habits)
+        #expect(week.weakestHabit?.name == "Run")
+        let focus = planner.plan(for: week).sessions.first { $0.kind == .focus }
+        #expect(focus?.rationale.contains("Goal is 3 a week") == true)
+    }
+
+    @Test func weakestHabitIsChosenByShortfallNotRawDays() {
+        // 2 of 3 is a better week than 2 of 7, even though the raw count matches.
+        let habits = [
+            HabitWeekStat(name: "Read", completedDays: 2, currentStreak: 0),
+            HabitWeekStat(name: "Run", completedDays: 2, currentStreak: 0, weeklyTarget: 3),
+        ]
+        #expect(summary(workouts: 3, minutes: 120, habits: habits).weakestHabit?.name == "Read")
+    }
+
+    @Test func overachievingAGoalDoesNotInflateTheRate() {
+        let habits = [
+            HabitWeekStat(name: "Run", completedDays: 6, currentStreak: 0, weeklyTarget: 3),
+            HabitWeekStat(name: "Read", completedDays: 0, currentStreak: 0),
+        ]
+        // 3 expected + 7 expected = 10; capped achievement 3 + 0 = 3.
+        #expect(summary(workouts: 1, minutes: 30, habits: habits).habitCompletionRate == 0.3)
+    }
 }

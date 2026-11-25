@@ -72,10 +72,13 @@ public struct RuleBasedPlanner: PlanGenerating {
             ))
         }
 
-        if let weakest = summary.weakestHabit, weakest.completedDays < 4 {
+        if let weakest = summary.weakestHabit {
+            let rationale = weakest.weeklyTarget.map {
+                "Goal is \($0) a week and it was done on \(weakest.completedDays) of the last 7 days. Schedule it like a meeting."
+            } ?? "Done on \(weakest.completedDays) of 7 days. Schedule it like a meeting."
             sessions.append(PlannedSession(
                 weekday: upcoming[1], kind: .focus, title: "Protect \(weakest.name.lowercased())", minutes: 10,
-                rationale: "Done on \(weakest.completedDays) of 7 days. Schedule it like a meeting."
+                rationale: rationale
             ))
         }
 

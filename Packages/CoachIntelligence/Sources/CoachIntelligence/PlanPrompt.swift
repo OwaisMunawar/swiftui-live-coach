@@ -24,7 +24,8 @@ enum PlanPrompt {
             lines.append("- No habits tracked yet")
         } else {
             for habit in summary.habits {
-                lines.append("- Habit \"\(habit.name)\": \(habit.completedDays)/7 days, streak \(habit.currentStreak)")
+                let goal = habit.weeklyTarget.map { ", goal \($0) days a week" } ?? ""
+                lines.append("- Habit \"\(habit.name)\": \(habit.completedDays)/7 days\(goal), streak \(habit.currentStreak)")
             }
         }
         lines.append("The plan starts on \(weekday).")

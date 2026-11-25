@@ -4,11 +4,36 @@ public struct HabitWeekStat: Hashable, Sendable {
     public var name: String
     public var completedDays: Int
     public var currentStreak: Int
+    /// Check-ins the habit aims for per week, or `nil` for a daily habit.
+    public var weeklyTarget: Int?
 
-    public init(name: String, completedDays: Int, currentStreak: Int) {
+    public init(name: String, completedDays: Int, currentStreak: Int, weeklyTarget: Int? = nil) {
         self.name = name
         self.completedDays = completedDays
         self.currentStreak = currentStreak
+        self.weeklyTarget = WeeklyGoal.normalized(weeklyTarget)
+    }
+
+    /// Days the habit is expected to be done within a window of `windowDays`.
+    /// A habit with a weekly goal is not expected on every day.
+    public func expectedDays(in windowDays: Int) -> Int {
+        guard let weeklyTarget else { return windowDays }
+        return min(weeklyTarget, windowDays)
+    }
+
+    /// Completed days measured against what was expected, capped at 1 so an
+    /// overachieved goal cannot hide a neglected habit elsewhere.
+    public func attainment(in windowDays: Int) -> Double {
+        let expected = expectedDays(in: windowDays)
+        guard expected > 0 else { return 1 }
+        return min(Double(completedDays) / Double(expected), 1)
+    }
+
+    /// A daily habit needs attention below four days out of seven; a habit
+    /// with a weekly goal as soon as it falls short of that goal.
+    public func needsAttention(in windowDays: Int) -> Bool {
+        if let weeklyTarget { return completedDays < min(weeklyTarget, windowDays) }
+        return completedDays < 4
     }
 }
 
@@ -38,14 +63,27 @@ public struct WeekSummary: Hashable, Sendable {
         self.averageActiveEnergy = averageActiveEnergy
     }
 
+    /// Share of expected check-ins that happened. A habit with a weekly goal is
+    /// measured against its goal, so "three a week" done three times counts as 100%.
     public var habitCompletionRate: Double {
-        let possible = habits.count * max(days.count, 1)
-        guard possible > 0 else { return 0 }
-        return Double(habits.map(\.completedDays).reduce(0, +)) / Double(possible)
+        let window = max(days.count, 1)
+        let expected = habits.map { $0.expectedDays(in: window) }.reduce(0, +)
+        guard expected > 0 else { return 0 }
+        let achieved = habits.map { min($0.completedDays, $0.expectedDays(in: window)) }.reduce(0, +)
+        return Double(achieved) / Double(expected)
     }
 
+    /// The habit furthest behind what it expects, among those that need attention.
+    /// `nil` when every habit is on track.
     public var weakestHabit: HabitWeekStat? {
-        habits.min { ($0.completedDays, $0.name) < ($1.completedDays, $1.name) }
+        let window = max(days.count, 1)
+        return habits
+            .filter { $0.needsAttention(in: window) }
+            .min { lhs, rhs in
+                let left = lhs.attainment(in: window)
+                let right = rhs.attainment(in: window)
+                return left == right ? lhs.name < rhs.name : left < right
+            }
     }
 
     public var strongestStreak: HabitWeekStat? {
@@ -70,7 +108,8 @@ extension WeekSummary {
             return HabitWeekStat(
                 name: habit.name,
                 completedDays: done.intersection(windowSet).count,
-                currentStreak: StreakCalculator.currentStreak(days: done, today: today, calendar: calendar)
+                currentStreak: StreakCalculator.currentStreak(days: done, today: today, calendar: calendar),
+                weeklyTarget: habit.weeklyTarget
             )
         }
 
