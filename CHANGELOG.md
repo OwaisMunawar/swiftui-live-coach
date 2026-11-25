@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-25
+
+### Fixed
+- The weekly plan ignored weekly goals. A habit set to "3 a week" and done three times was flagged as weak ("Protect run, done on 3 of 7 days") and pulled the Habits percentage down. Habits with a goal are now measured against that goal, are only flagged when they fall short of it, and the rationale states the goal. The on-device model prompt includes each habit's goal as well.
+
 ## [0.2.1] - 2026-11-19
 
 ### Added
