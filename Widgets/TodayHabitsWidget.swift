@@ -11,6 +11,8 @@ struct HabitSnapshot: Identifiable, Hashable {
     let tint: HabitTint
     let isDone: Bool
     let streak: Int
+    /// Progress against a weekly goal, or `nil` for a daily habit.
+    var weekly: WeeklyProgress?
 }
 
 struct TodayEntry: TimelineEntry {
@@ -23,7 +25,8 @@ struct TodayEntry: TimelineEntry {
     static let placeholder = TodayEntry(date: .now, habits: [
         HabitSnapshot(id: UUID(), name: "Morning stretch", symbolName: "figure.flexibility", tint: .teal, isDone: true, streak: 12),
         HabitSnapshot(id: UUID(), name: "Drink 2L water", symbolName: "drop.fill", tint: .indigo, isDone: true, streak: 21),
-        HabitSnapshot(id: UUID(), name: "Read 20 pages", symbolName: "book.fill", tint: .orange, isDone: false, streak: 4),
+        HabitSnapshot(id: UUID(), name: "Read 20 pages", symbolName: "book.fill", tint: .orange, isDone: false, streak: 4,
+                      weekly: WeeklyProgress(target: 5, completed: 3, daysLeft: 3)),
         HabitSnapshot(id: UUID(), name: "Meditate", symbolName: "brain.head.profile", tint: .green, isDone: false, streak: 6),
     ])
 }
@@ -55,7 +58,8 @@ struct TodayProvider: TimelineProvider {
                 symbolName: habit.symbolName,
                 tint: habit.tint,
                 isDone: habit.isCompleted(on: today),
-                streak: habit.currentStreak(today: today, calendar: .current)
+                streak: habit.currentStreak(today: today, calendar: .current),
+                weekly: habit.weeklyProgress(today: today, calendar: .current)
             )
         })
     }
@@ -135,7 +139,14 @@ struct TodayHabitsView: View {
                         .lineLimit(1)
                         .strikethrough(habit.isDone, color: .secondary)
                     Spacer()
-                    if habit.streak > 1 {
+                    if let weekly = habit.weekly {
+                        Text("\(weekly.completed)/\(weekly.target)")
+                            .font(.caption.monospacedDigit().weight(.semibold))
+                            .foregroundStyle(weekly.isMet ? .green : .secondary)
+                            .accessibilityLabel(
+                                "\(weekly.completed) of \(weekly.target) this week"
+                            )
+                    } else if habit.streak > 1 {
                         Label("\(habit.streak)", systemImage: "flame.fill")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.orange)
