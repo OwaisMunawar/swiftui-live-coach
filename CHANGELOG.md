@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-25
+
+### Added
+- The Today widget shows weekly-goal progress ("3/5", green once met) in place of the day streak for habits with a weekly goal.
+- UI test for the workout flow: start a run, pause, resume, finish and find it in the history.
+
 ## [0.2.2] - 2026-11-25
 
 ### Fixed
